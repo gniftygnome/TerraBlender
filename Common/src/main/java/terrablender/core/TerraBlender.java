@@ -42,7 +42,7 @@ public class TerraBlender {
 
     public static void registerBiome(BiConsumer<ResourceKey<Biome>, Supplier<? extends Biome>> registerBiome)
     {
-        registerBiome.accept(Region.DEFERRED_PLACEHOLDER, OverworldBiomes::theVoid);
+        registerBiome.accept(Region.DEFERRED_PLACEHOLDER, () -> OverworldBiomes.theVoid(null, null));
     }
 
     public static void registerRule(BiConsumer<String, Supplier<Codec<? extends SurfaceRules.RuleSource>>> register)

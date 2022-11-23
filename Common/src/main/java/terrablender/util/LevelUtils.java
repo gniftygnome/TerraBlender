@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.biome.Biome;
@@ -32,7 +33,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import terrablender.DimensionTypeTags;
 import terrablender.api.RegionType;
 import terrablender.api.Regions;
@@ -49,13 +49,10 @@ public class LevelUtils
     public static void initializeOnServerStart(MinecraftServer server)
     {
         RegistryAccess registryAccess = server.registryAccess();
-        WorldGenSettings worldGenSettings = server.getWorldData().worldGenSettings();
 
-        for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : worldGenSettings.dimensions().entrySet())
-        {
-            LevelStem stem = entry.getValue();
-            initializeBiomes(registryAccess, stem.typeHolder(), entry.getKey(), stem.generator(), worldGenSettings.seed());
-        }
+        for (Map.Entry<ResourceKey<LevelStem>, LevelStem> entry : registryAccess.registryOrThrow(Registries.LEVEL_STEM).entrySet()) {
+            initializeBiomes(registryAccess, entry.getValue().type(), entry.getKey(), entry.getValue().generator(), server.getWorldData().worldGenOptions().seed());
+        };
     }
 
     public static boolean shouldApplyToChunkGenerator(ChunkGenerator chunkGenerator)
@@ -108,7 +105,7 @@ public class LevelUtils
         parametersEx.initializeForTerraBlender(registryAccess, regionType, seed);
 
         // Append modded biomes to the biome source biome list
-        Registry<Biome> biomeRegistry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+        Registry<Biome> biomeRegistry = registryAccess.registryOrThrow(Registries.BIOME);
         ImmutableList.Builder<Holder<Biome>> builder = ImmutableList.builder();
         Regions.get(regionType).forEach(region -> region.addBiomes(biomeRegistry, pair -> builder.add(biomeRegistry.getHolderOrThrow(pair.getSecond()))));
         biomeSourceEx.appendDeferredBiomesList(builder.build());

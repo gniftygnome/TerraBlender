@@ -31,8 +31,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import terrablender.core.TerraBlender;
-import terrablender.util.LevelUtils;
 import terrablender.worldgen.IExtendedChunkGenerator;
 
 import java.util.ArrayList;
@@ -65,9 +63,8 @@ public class MixinChunkGenerator implements IExtendedChunkGenerator
     @Override
     public void updateFeaturesPerStep()
     {
-        this.featuresPerStep = Suppliers.memoize(() ->
-        {
-            return FeatureSorter.buildFeaturesPerStep(this.biomeSource.possibleBiomes().stream().toList(), biome -> {
+        this.featuresPerStep = Suppliers.memoize(() -> {
+            return FeatureSorter.buildFeaturesPerStep(List.copyOf(biomeSource.possibleBiomes()), biome -> {
                 return this.generationSettingsGetter.apply(biome).features();
             }, true);
         });
